@@ -9,6 +9,7 @@ module ArtNet
       @port    = options[:port] || 6454
       @network = options[:network] || "2.0.0.0"
       @netmask = options[:netmask] || "255.255.255.0"
+      @unicast_ip = options[:unicast_ip] || false
       @broadcast_ip = get_broadcast_ip @network, @netmask
       @local_ip = get_local_ip @network
       setup_broadcast_connection
@@ -42,7 +43,13 @@ module ArtNet
       packet_items = [id, opcode, protver, seq, phy, subuni, uni, length]
       packet_items += data
       packet = packet_items.pack "a7xvnCCCCnC#{length}"
-      @udp_bcast.send packet, 0, @broadcast_ip, @port
+      
+      if @unicast_ip != false
+        @udp_bcast.send packet, 0, @unicast_ip, @port
+      else
+        @udp_bcast.send packet, 0, @broadcast_ip, @port
+      end
+      
     end
     
     # send an ArtPoll packet
