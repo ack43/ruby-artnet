@@ -58,8 +58,8 @@ module ArtNet
     end
     
     def close_connection
-      @udp.close
-      @udp_bcast.close
+      @udp.close if @udp
+      @udp_bcast.close if @udp_bcast
     end
     
     private 
