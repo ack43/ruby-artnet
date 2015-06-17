@@ -57,6 +57,11 @@ module ArtNet
       @udp_bcast.send [id, opcode, protver, 0, 0].pack("a7xvnCC"), 0, @broadcast_ip, @port
     end
     
+    def close_connection
+      @udp.close
+      @udp_bcast.close
+    end
+    
     private 
     
     # given a network, finds the local interface IP that would be used to reach it
