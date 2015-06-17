@@ -107,7 +107,7 @@ module ArtNet
       @udp_bcast = UDPSocket.new
       @udp_bcast.setsockopt(Socket::SOL_SOCKET, Socket::SO_BROADCAST, true)
     end
-
+    
   end
   
   class PacketFormatError < RuntimeError
