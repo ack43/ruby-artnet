@@ -11,7 +11,7 @@ module ArtNet
       @netmask = options[:netmask] || "255.255.255.0"
       @broadcast_ip = get_broadcast_ip @network, @netmask
       @local_ip = get_local_ip @network
-      setup_connection
+      setup_broadcast_connection
       @rx_data = Array.new(4) { Array.new(4, [] ) }
       @tx_data = Array.new(4) { Array.new(4, Array.new(512, 0) ) }
       @nodes = Array.new
@@ -104,8 +104,13 @@ module ArtNet
     def setup_connection
       @udp = UDPSocket.new
       @udp.bind "0.0.0.0", @port
+      setup_broadcast_connection
+    end
+    
+    def setup_broadcast_connection
       @udp_bcast = UDPSocket.new
       @udp_bcast.setsockopt(Socket::SOL_SOCKET, Socket::SO_BROADCAST, true)
+      
     end
     
   end
