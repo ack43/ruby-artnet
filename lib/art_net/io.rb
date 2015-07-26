@@ -14,7 +14,11 @@ module ArtNet
       @local_ip = get_local_ip @network
       setup_broadcast_connection
       @rx_data = Array.new(4) { Array.new(4, [] ) }
-      @tx_data = Array.new(4) { Array.new(4, Array.new(512, 0) ) }
+      
+      @number_of_universes = options[:number_of_universes] || 1
+      @number_of_sub_universes = options[:number_of_sub_universes] || 1
+      
+      @tx_data = Array.new(@number_of_universes) { Array.new(@number_of_sub_universes, Array.new(512, 0) ) }
       @nodes = Array.new
     end
 
@@ -29,9 +33,15 @@ module ArtNet
       end
     end
     
+    def simple_update channel_value_array, uni=0, subuni=0
+      @tx_data[uni][subuni] = channel_value_array
+      send_update(uni, subuni)
+      close_connection
+    end
+      
     # send an ArtDmx packet for a specific universe
     # FIXME: make this able to unicast via a node instance method
-    def send_update(uni, subuni)
+    def send_update(uni=0, subuni=0)
       id = 'Art-Net'
       opcode = 0x5000 # OpPoll
       protver = 14
