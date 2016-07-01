@@ -19,8 +19,8 @@ module ArtNet
 
     def process_events
       begin
-        until !(data = @udp.recvfrom_nonblock(65535)[0]) do
-          process_rx_data data
+        until !((data = @udp.recvfrom_nonblock(65535))[0]) do
+          process_rx_data *data
         end
       rescue Errno::EAGAIN
         # no data to process!
@@ -72,7 +72,8 @@ module ArtNet
       IPAddr.new(network).|(IPAddr.new(mask).~).to_s
     end
     
-    def process_rx_data data
+    def process_rx_data data, sender
+      puts sender.inspect
       packet = Packet.load(data)
       #raise PacketFormatError unless id == "Art-Net"
       case packet.class.to_s
