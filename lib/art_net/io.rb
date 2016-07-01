@@ -73,11 +73,11 @@ module ArtNet
     end
     
     def process_rx_data data
-      (id, opcode, protver) = data.unpack "Z7xSn"
-      raise PacketFormatError unless id == "Art-Net"
-      case opcode
-        when 0x2000 # OpPoll / ArtPoll
-        when 0x2100 # OpPollReply
+      packet = Packet.load(data)
+      #raise PacketFormatError unless id == "Art-Net"
+      case packet.class.to_s
+        when Packet::OpPoll.to_s# or ArtPoll
+        when Packet::OpPollReply.to_s
           node = ArtNet::Node.new
           node.ip = data.unpack("@10CCCC").join(".")
           node.swin = Array.new
@@ -87,12 +87,12 @@ module ArtNet
             node.swout[0], node.swout[1], node.swout[2], node.swout[3]                    \
           ) = data.unpack "@18CCxxxxnZ18Z64x64nx4x4x4CCCCCCCC"
           @nodes << node
-        when 0x5000 # OpDmx / OpOutput
+        when Packet::OpOutput.to_s# or OpDMX
           (seq, phy, subuni, uni, length) = data.unpack "@12CCCCn"
           dmxdata = data.unpack "@18C#{length}"
           @rx_data[uni][subuni][0..dmxdata.length] = dmxdata
         else
-          puts "Received unknown opcode 0x#{opcode.to_s(16)}"
+          puts "Received unknown data"
       end
     end
 
