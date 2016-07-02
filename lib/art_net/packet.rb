@@ -53,10 +53,10 @@ module ArtNet
 
     class OpOutput < Base
 
-      def initialize(data)
+      attr :universe, :length, :channels
+      def unpack(data)
         protver, @sequence, @physical, @universe, @length = data.unpack 'nCCvn'
-        @length += 2
-        @channels = data.unpack "@6C#{@length}C"
+        @channels = data.unpack "@8C#{@length}C"
         final = @channels.pop
         raise 'Bad data for ' + self.class.to_s unless final.nil?
       end

@@ -12,7 +12,7 @@ module ArtNet
       @broadcast_ip = get_broadcast_ip @network, @netmask
       @local_ip = get_local_ip @network
       setup_connection
-      @rx_data = Array.new(4) { Array.new(4, [] ) }
+      @rx_data = Array.new(4, [])
       @tx_data = Array.new(4) { Array.new(4, Array.new(512, 0) ) }
       @nodes = {}
     end
@@ -80,9 +80,7 @@ module ArtNet
         when Packet::OpPollReply.to_s
           @nodes[sender[3]] = packet.node
         when Packet::OpOutput.to_s# or OpDMX
-          (seq, phy, subuni, uni, length) = data.unpack "@12CCCCn"
-          dmxdata = data.unpack "@18C#{length}"
-          @rx_data[uni][subuni][0..dmxdata.length] = dmxdata
+          @rx_data[packet.universe][0..packet.length] = packet.channels
         else
           puts "Received unknown data"
       end
