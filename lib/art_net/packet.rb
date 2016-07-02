@@ -3,18 +3,28 @@ require 'ipaddr'
 module ArtNet
   module Packet
 
-    class OpPoll
+    class Base
 
-      def initialize(data)
+      def self.unpack(data)
+        p = self.new
+        p.unpack(data)
+        p
+      end
+
+    end
+
+    class OpPoll < Base
+
+      def unpack(data)
         protver, @talk_to_me, @priority, final = data.unpack 'nCCC'
         raise 'Bad data for ' + self.class.to_s unless final.nil?
       end
 
     end
 
-    class OpPollReply
+    class OpPollReply < Base
 
-      def initialize(data)
+      def unpack(data)
         @mac = []
         @swin = []
         @swout = []
@@ -41,7 +51,7 @@ module ArtNet
 
     end
 
-    class OpOutput
+    class OpOutput < Base
 
       def initialize(data)
         protver, @sequence, @physical, @universe, @length = data.unpack 'nCCvn'
@@ -64,16 +74,7 @@ module ArtNet
       return nil unless id === 'Art-Net'
       klass = TYPES[opcode]
       raise "Unknown opcode 0x#{opcode.to_s(16)}" if klass.nil?
-      return klass.new(data[10..-1])
-    end
-
-    class Base
-
-      def initialize(data)
-        @id, @opcode, @protver, @sequence, @physical, @universe, @length = data.unpack "Z7xSnCCnn"
-        @data = data[18..-1]
-      end
-
+      return klass.unpack(data[10..-1])
     end
 
   end
