@@ -14,7 +14,7 @@ module ArtNet
       setup_connection
       @rx_data = Array.new(4) { Array.new(4, [] ) }
       @tx_data = Array.new(4) { Array.new(4, Array.new(512, 0) ) }
-      @nodes = Array.new
+      @nodes = {}
     end
 
     def process_events
@@ -73,21 +73,12 @@ module ArtNet
     end
     
     def process_rx_data data, sender
-      puts sender.inspect
       packet = Packet.load(data)
       #raise PacketFormatError unless id == "Art-Net"
       case packet.class.to_s
         when Packet::OpPoll.to_s# or ArtPoll
         when Packet::OpPollReply.to_s
-          node = ArtNet::Node.new
-          node.ip = data.unpack("@10CCCC").join(".")
-          node.swin = Array.new
-          node.swout = Array.new
-          (node.uni, node.subuni, node.mfg, node.shortname, node.longname, node.numports, \
-            node.swin[0], node.swin[1], node.swin[2], node.swin[3],                       \
-            node.swout[0], node.swout[1], node.swout[2], node.swout[3]                    \
-          ) = data.unpack "@18CCxxxxnZ18Z64x64nx4x4x4CCCCCCCC"
-          @nodes << node
+          @nodes[sender[3]] = packet.node
         when Packet::OpOutput.to_s# or OpDMX
           (seq, phy, subuni, uni, length) = data.unpack "@12CCCCn"
           dmxdata = data.unpack "@18C#{length}"

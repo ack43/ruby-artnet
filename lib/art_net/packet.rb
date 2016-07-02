@@ -30,6 +30,15 @@ module ArtNet
         raise 'Bad data for ' + self.class.to_s unless final.nil?
       end
 
+      def node
+        node = ArtNet::Node.new
+        node.ip = @ip.to_s
+        node.swin = @swin
+        node.swout = @swout
+        node.uni, node.subuni, node.mfg, node.shortname, node.longname, node.numports = 0,0, @manufacturer, @short_name, @long_name, @ports
+        node
+      end
+
     end
 
     class OpOutput
