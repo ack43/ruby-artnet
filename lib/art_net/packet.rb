@@ -3,6 +3,9 @@ require 'ipaddr'
 module ArtNet
   module Packet
 
+    ID = 'Art-Net'
+    PROTVER = 14
+
     class Base
 
       def self.unpack(data)
@@ -11,13 +14,28 @@ module ArtNet
         p
       end
 
+      def opcode
+        TYPES.invert[self.class]
+      end
+
     end
 
     class OpPoll < Base
 
+      attr_accessor :talk_to_me, :priority
+
+      def initialize
+        @talk_to_me = 0
+        @priority = 0
+      end
+
       def unpack(data)
         protver, @talk_to_me, @priority, final = data.unpack 'nCCC'
         raise 'Bad data for ' + self.class.to_s unless final.nil?
+      end
+
+      def pack
+        [ID, opcode, PROTVER, @talk_to_me, @priority].pack("a7xvnCC")
       end
 
     end
@@ -53,12 +71,27 @@ module ArtNet
 
     class OpOutput < Base
 
-      attr :universe, :length, :channels
+      attr_accessor :sequence, :physical, :universe, :channels
+
+      def initialize
+        @sequence = 0
+        @physical = 0
+        @channels = []
+      end
+
       def unpack(data)
-        protver, @sequence, @physical, @universe, @length = data.unpack 'nCCvn'
-        @channels = data.unpack "@8C#{@length}C"
+        protver, @sequence, @physical, @universe, length = data.unpack 'nCCvn'
+        @channels = data.unpack "@8C#{length}C"
         final = @channels.pop
         raise 'Bad data for ' + self.class.to_s unless final.nil?
+      end
+
+      def pack
+        ([ID, opcode, PROTVER, sequence, physical, universe, channels.length] + channels).pack "Z7xvnCCvnC#{length}"
+      end
+
+      def length
+        channels.length
       end
 
     end

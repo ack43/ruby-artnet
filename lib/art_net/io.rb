@@ -12,8 +12,8 @@ module ArtNet
       @broadcast_ip = get_broadcast_ip @network, @netmask
       @local_ip = get_local_ip @network
       setup_connection
-      @rx_data = Array.new(4, [])
-      @tx_data = Array.new(4) { Array.new(4, Array.new(512, 0) ) }
+      @rx_data = Array.new(4) { [] }
+      @tx_data = Array.new(4) { Array.new(512, 0) }
       @nodes = {}
     end
 
@@ -30,19 +30,11 @@ module ArtNet
     
     # send an ArtDmx packet for a specific universe
     # FIXME: make this able to unicast via a node instance method
-    def send_update(uni, subuni)
-      id = 'Art-Net'
-      opcode = 0x5000 # OpPoll
-      protver = 14
-      seq = 0
-      phy = 0
-      data = @tx_data[uni][subuni].dup
-      data.shift  # element zero isn't used for anything as that's traditionally "start code"
-      length = data.length-1
-      packet_items = [id, opcode, protver, seq, phy, subuni, uni, length]
-      packet_items += data
-      packet = packet_items.pack "a7xvnCCCCnC#{length}"
-      @udp_bcast.send packet, 0, @broadcast_ip, @port
+    def send_update(uni)
+      p = Packet::OpOutput.new
+      p.universe = uni
+      p.channels = @tx_data[uni]
+      @udp_bcast.send p.pack, 0, @broadcast_ip, @port
     end
     
     # send an ArtPoll packet
@@ -50,11 +42,8 @@ module ArtNet
     def poll_nodes
       # clear any list of nodes we already know about and start fresh
       @nodes.clear
-      # build a new OpPoll packet and send it out
-      id = 'Art-Net'
-      opcode = 0x2000 # OpPoll
-      protver = 14
-      @udp_bcast.send [id, opcode, protver, 0, 0].pack("a7xvnCC"), 0, @broadcast_ip, @port
+      packet = Packet::OpPoll.new
+      @udp_bcast.send packet.pack, 0, @broadcast_ip, @port
     end
     
     private 
