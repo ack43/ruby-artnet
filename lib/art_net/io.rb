@@ -20,14 +20,14 @@ module ArtNet
     def process_events
       begin
         until !((data = @udp.recvfrom_nonblock(65535))[0]) do
-          process_rx_data *data
+          process_rx_data(*data)
         end
       rescue Errno::EAGAIN
         # no data to process!
         return nil
       end
     end
-    
+
     # send an ArtDmx packet for a specific universe
     # FIXME: make this able to unicast via a node instance method
     def send_update(uni)
@@ -36,7 +36,7 @@ module ArtNet
       p.channels = @tx_data[uni]
       @udp_bcast.send p.pack, 0, @broadcast_ip, @port
     end
-    
+
     # send an ArtPoll packet
     # normal process_events calls later will then collect the results in @nodes
     def poll_nodes
@@ -45,9 +45,9 @@ module ArtNet
       packet = Packet::OpPoll.new
       @udp_bcast.send packet.pack, 0, @broadcast_ip, @port
     end
-    
-    private 
-    
+
+    private
+
     # given a network, finds the local interface IP that would be used to reach it
     def get_local_ip(network)
       UDPSocket.open do |sock|
@@ -55,12 +55,12 @@ module ArtNet
         sock.addr.last
       end
     end
-    
+
     # given a network, returns the broadcast IP
     def get_broadcast_ip(network, mask)
       IPAddr.new(network).|(IPAddr.new(mask).~).to_s
     end
-    
+
     def process_rx_data data, sender
       packet = Packet.load(data)
       #raise PacketFormatError unless id == "Art-Net"
@@ -83,7 +83,7 @@ module ArtNet
     end
 
   end
-  
+
   class PacketFormatError < RuntimeError
   end
 end
