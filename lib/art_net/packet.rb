@@ -1,6 +1,10 @@
 require 'ipaddr'
 
 module ArtNet
+
+  class PacketFormatError < RuntimeError
+  end
+
   module Packet
 
     ID = 'Art-Net'
@@ -18,6 +22,12 @@ module ArtNet
         TYPES.invert[self.class]
       end
 
+      private
+
+      def check_version(ver)
+        raise PacketFormatError.new("Bad protocol version #{ver}") unless ver == PROTVER
+      end
+
     end
 
     class OpPoll < Base
@@ -31,7 +41,8 @@ module ArtNet
 
       def unpack(data)
         protver, @talk_to_me, @priority, final = data.unpack 'nCCC'
-        raise 'Bad data for ' + self.class.to_s unless final.nil?
+        check_version(protver)
+        raise PacketFormatError.new('Bad data for ' + self.class.to_s) unless final.nil?
       end
 
       def pack
@@ -55,7 +66,7 @@ module ArtNet
         @ip = ::IPAddr.new(ip,  Socket::AF_INET)
         @firmware_version = "#{versionh}.#{versionl}".to_f
         @bind_ip = ::IPAddr.new(bind_ip,  Socket::AF_INET)
-        raise 'Bad data for ' + self.class.to_s unless final.nil?
+        raise PacketFormatError.new('Bad data for ' + self.class.to_s) unless final.nil?
       end
 
       def node
@@ -83,7 +94,8 @@ module ArtNet
         protver, @sequence, @physical, @universe, length = data.unpack 'nCCvn'
         @channels = data.unpack "@8C#{length}C"
         final = @channels.pop
-        raise 'Bad data for ' + self.class.to_s unless final.nil?
+        check_version(protver)
+        raise PacketFormatError.new('Bad data for ' + self.class.to_s) unless final.nil?
       end
 
       def pack
@@ -104,9 +116,9 @@ module ArtNet
 
     def self.load(data)
       id, opcode = data.unpack 'Z7xS'
-      return nil unless id === 'Art-Net'
+      raise PacketFormatError.new('Not an Art-Net packet') unless id === 'Art-Net'
       klass = TYPES[opcode]
-      raise "Unknown opcode 0x#{opcode.to_s(16)}" if klass.nil?
+      raise PacketFormatError.new("Unknown opcode 0x#{opcode.to_s(16)}") if klass.nil?
       return klass.unpack(data[10..-1])
     end
 

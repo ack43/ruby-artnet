@@ -67,7 +67,6 @@ module ArtNet
 
     def process_rx_data data, sender
       packet = Packet.load(data)
-      #raise PacketFormatError unless id == "Art-Net"
       case packet.class.to_s
         when Packet::OpPoll.to_s# or ArtPoll
         when Packet::OpPollReply.to_s
@@ -88,6 +87,4 @@ module ArtNet
 
   end
 
-  class PacketFormatError < RuntimeError
-  end
 end
