@@ -62,7 +62,7 @@ module ArtNet
 
     # given a network, returns the broadcast IP
     def get_broadcast_ip(network, mask)
-      IPAddr.new(network).|(IPAddr.new(mask).~).to_s
+      (IPAddr.new(network) | ~IPAddr.new(mask)).to_s
     end
 
     def process_rx_data data, sender
