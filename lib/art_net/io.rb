@@ -2,7 +2,7 @@ require 'ipaddr'
 require 'socket'
 module ArtNet
   class IO
-    attr_reader   :rx_data, :nodes
+    attr_reader   :rx_data
     attr_accessor :tx_data
 
     def initialize(options = {})
@@ -44,6 +44,10 @@ module ArtNet
       @nodes.clear
       packet = Packet::OpPoll.new
       @udp_bcast.send packet.pack, 0, @broadcast_ip, @port
+    end
+
+    def nodes
+      @nodes.values
     end
 
     private
