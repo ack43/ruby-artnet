@@ -23,7 +23,7 @@ module ArtNet
       end
 
       def opcode
-        TYPES.invert[self.class]
+        Packet.types.invert[self.class]
       end
 
       def type
@@ -151,17 +151,25 @@ module ArtNet
 
     end
 
-    TYPES = {
+    @@types = {
       0x2000 => Poll,
       0x2100 => PollReply,
       0x5000 => DMX,
       0x6000 => Address
     }
 
+    def self.types
+      @@types
+    end
+
+    def self.register(opcode, klass)
+      @@types[opcode] = klass
+    end
+
     def self.load(data, sender)
       id, opcode = data.unpack 'Z7xS'
       raise PacketFormatError.new('Not an Art-Net packet') unless id === 'Art-Net'
-      klass = TYPES[opcode]
+      klass = types[opcode]
       raise PacketFormatError.new("Unknown opcode 0x#{opcode.to_s(16)}") if klass.nil?
       packet = klass.unpack(data[10..-1], sender)
       return packet
