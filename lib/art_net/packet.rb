@@ -12,9 +12,13 @@ module ArtNet
 
     class Base
 
-      def self.unpack(data)
+      attr_writer :net_info
+
+      def self.unpack(data, net_info)
         p = self.new
         p.unpack(data)
+        net_info[4] = Time.now
+        p.net_info = net_info
         p
       end
 
@@ -24,6 +28,18 @@ module ArtNet
 
       def type
         self.class.name.split('::').last
+      end
+
+      def sender_name
+        @net_info[2]
+      end
+
+      def sender_ip
+        @net_info[3]
+      end
+
+      def received_at
+        @net_info[4]
       end
 
       private
@@ -118,12 +134,13 @@ module ArtNet
       0x5000 => DMX
     }
 
-    def self.load(data)
+    def self.load(data, sender)
       id, opcode = data.unpack 'Z7xS'
       raise PacketFormatError.new('Not an Art-Net packet') unless id === 'Art-Net'
       klass = TYPES[opcode]
       raise PacketFormatError.new("Unknown opcode 0x#{opcode.to_s(16)}") if klass.nil?
-      return klass.unpack(data[10..-1])
+      packet = klass.unpack(data[10..-1], sender)
+      return packet
     end
 
   end

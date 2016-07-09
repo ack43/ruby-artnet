@@ -2,7 +2,7 @@ require 'ipaddr'
 require 'socket'
 module ArtNet
   class IO
-    attr_reader   :rx_data
+    attr_reader   :rx_data, :local_ip, :netmask, :broadcast_ip, :port
     attr_accessor :tx_data
 
     def initialize(options = {})
@@ -76,7 +76,7 @@ module ArtNet
     end
 
     def process_rx_data data, sender
-      packet = Packet.load(data)
+      packet = Packet.load(data, sender)
       case packet.class.to_s
         when Packet::Poll.to_s
         when Packet::PollReply.to_s
