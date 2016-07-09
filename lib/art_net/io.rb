@@ -35,7 +35,7 @@ module ArtNet
       p = Packet::DMX.new
       p.universe = uni
       p.channels = @tx_data[uni]
-      @udp_bcast.send p.pack, 0, @broadcast_ip, @port
+      transmit p
     end
 
     # send an ArtPoll packet
@@ -43,8 +43,7 @@ module ArtNet
     def poll_nodes
       # clear any list of nodes we already know about and start fresh
       @nodes.clear
-      packet = Packet::Poll.new
-      @udp_bcast.send packet.pack, 0, @broadcast_ip, @port
+      transmit Packet::Poll.new
     end
 
     def nodes
@@ -57,6 +56,14 @@ module ArtNet
 
     def on(name, &block)
       @callbacks[name] = block
+    end
+
+    def transmit(packet, node=nil)
+      if node.nil?
+        @udp_bcast.send packet.pack, 0, @broadcast_ip, @port
+      else
+        @udp_bcast.send packet.pack, 0, node.ip, @port
+      end
     end
 
     private
