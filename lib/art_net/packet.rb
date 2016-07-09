@@ -34,7 +34,7 @@ module ArtNet
 
     end
 
-    class OpPoll < Base
+    class Poll < Base
 
       attr_accessor :talk_to_me, :priority
 
@@ -55,7 +55,7 @@ module ArtNet
 
     end
 
-    class OpPollReply < Base
+    class PollReply < Base
 
       def unpack(data)
         @mac = []
@@ -84,7 +84,7 @@ module ArtNet
 
     end
 
-    class OpOutput < Base
+    class DMX < Base
 
       attr_accessor :sequence, :physical, :universe, :channels
 
@@ -113,9 +113,9 @@ module ArtNet
     end
 
     TYPES = {
-      0x2000 => OpPoll,
-      0x2100 => OpPollReply,
-      0x5000 => OpOutput
+      0x2000 => Poll,
+      0x2100 => PollReply,
+      0x5000 => DMX
     }
 
     def self.load(data)

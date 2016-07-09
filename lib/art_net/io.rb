@@ -32,7 +32,7 @@ module ArtNet
     # send an ArtDmx packet for a specific universe
     # FIXME: make this able to unicast via a node instance method
     def send_update(uni)
-      p = Packet::OpOutput.new
+      p = Packet::DMX.new
       p.universe = uni
       p.channels = @tx_data[uni]
       @udp_bcast.send p.pack, 0, @broadcast_ip, @port
@@ -43,7 +43,7 @@ module ArtNet
     def poll_nodes
       # clear any list of nodes we already know about and start fresh
       @nodes.clear
-      packet = Packet::OpPoll.new
+      packet = Packet::Poll.new
       @udp_bcast.send packet.pack, 0, @broadcast_ip, @port
     end
 
@@ -78,11 +78,11 @@ module ArtNet
     def process_rx_data data, sender
       packet = Packet.load(data)
       case packet.class.to_s
-        when Packet::OpPoll.to_s# or ArtPoll
-        when Packet::OpPollReply.to_s
+        when Packet::Poll.to_s
+        when Packet::PollReply.to_s
           @nodes[sender[3]] = packet.node
           callback :node_update, nodes
-        when Packet::OpOutput.to_s# or OpDMX
+        when Packet::DMX.to_s
           @rx_data[packet.universe][0..packet.length] = packet.channels
         else
           puts "Received unknown data"
