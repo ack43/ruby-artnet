@@ -22,6 +22,10 @@ module ArtNet
         TYPES.invert[self.class]
       end
 
+      def type
+        self.class.name.split('::').last
+      end
+
       private
 
       def check_version(ver)

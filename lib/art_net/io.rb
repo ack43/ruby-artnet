@@ -15,6 +15,7 @@ module ArtNet
       @rx_data = Array.new(4) { [] }
       @tx_data = Array.new(4) { Array.new(512, 0) }
       @nodes = {}
+      @callbacks = {}
     end
 
     def process_events
@@ -50,7 +51,16 @@ module ArtNet
       @nodes.values
     end
 
+    def on(name, &block)
+      @callbacks[name] = block
+    end
+
     private
+
+    def callback(name, *args)
+      method = @callbacks[name]
+      method.call(*args) if method
+    end
 
     # given a network, finds the local interface IP that would be used to reach it
     def get_local_ip(network)
@@ -71,11 +81,13 @@ module ArtNet
         when Packet::OpPoll.to_s# or ArtPoll
         when Packet::OpPollReply.to_s
           @nodes[sender[3]] = packet.node
+          callback :node_update, nodes
         when Packet::OpOutput.to_s# or OpDMX
           @rx_data[packet.universe][0..packet.length] = packet.channels
         else
           puts "Received unknown data"
       end
+      callback(:message, packet) if packet
     end
 
     def setup_connection
