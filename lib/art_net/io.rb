@@ -51,6 +51,10 @@ module ArtNet
       @nodes.values
     end
 
+    def node(ip)
+      @nodes[ip]
+    end
+
     def on(name, &block)
       @callbacks[name] = block
     end
