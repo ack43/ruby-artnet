@@ -81,12 +81,12 @@ module ArtNet
 
     def process_rx_data data, sender
       packet = Packet.load(data, sender)
-      case packet.class.to_s
-        when Packet::Poll.to_s
-        when Packet::PollReply.to_s
+      case packet
+        when Packet::Poll
+        when Packet::PollReply
           @nodes[sender[3]] = packet.node
           callback :node_update, nodes
-        when Packet::DMX.to_s
+        when Packet::DMX
           @rx_data[packet.universe][0..packet.length] = packet.channels
         else
           puts "Received unknown data"
