@@ -82,7 +82,7 @@ module ArtNet
         @short_name, @long_name, @report, @ports, @port_types[0], @port_types[1], @port_types[2], @port_types[3],
         @input, @output, @swin[0], @swin[1], @swin[2], @swin[3], @swout[0], @swout[1], @swout[2], @swout[3],
         @swvideo, @swmacro, @swremote, @style, @mac[0], @mac[1], @mac[2], @mac[3], @mac[4], @mac[5],
-        bind_ip, @bindIndex, @statis2, final = data.unpack 'L>xxCCCCvCCn Z18Z64Z64nC4 LLC4C4 CCCxxxCC6 LCCx26C'
+        bind_ip, @bindIndex, @status2, final = data.unpack 'L>xxCCCCvCCn Z18Z64Z64nC4 LLC4C4 CCCxxxCC6 LCCx26C'
         @ip = ::IPAddr.new(ip,  Socket::AF_INET)
         @firmware_version = "#{versionh}.#{versionl}".to_f
         @bind_ip = ::IPAddr.new(bind_ip,  Socket::AF_INET)
@@ -92,8 +92,10 @@ module ArtNet
       def node
         node = ArtNet::Node.new
         node.ip = @ip.to_s
+        node.mac = @mac.map{|b| '%02x' % b}.join(':')
         node.swin = @swin
         node.swout = @swout
+        node.firmware_version = @firmware_version
         node.uni, node.subuni, node.mfg, node.shortname, node.longname, node.numports = 0,0, @manufacturer, @short_name, @long_name, @ports
         node
       end
