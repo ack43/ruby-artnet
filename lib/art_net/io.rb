@@ -66,6 +66,14 @@ module ArtNet
       end
     end
 
+    def reconnect(ip, netmask)
+      @local_ip = ip
+      @netmask = netmask
+      @network = (IPAddr.new(@local_ip) & IPAddr.new(@netmask)).to_s
+      @broadcast_ip = get_broadcast_ip @network, @netmask
+      poll_nodes
+    end
+
     private
 
     def callback(name, *args)
@@ -95,8 +103,6 @@ module ArtNet
           callback :node_update, nodes
         when Packet::DMX
           @rx_data[packet.universe][0..packet.length] = packet.channels
-        else
-          puts "Received unknown data"
       end
       callback(:message, packet) if packet
     end
