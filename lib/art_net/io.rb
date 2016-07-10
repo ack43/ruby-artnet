@@ -62,7 +62,7 @@ module ArtNet
       if node.nil?
         @udp_bcast.send packet.pack, 0, @broadcast_ip, @port
       else
-        @udp_bcast.send packet.pack, 0, node.ip, @port
+        @udp.send packet.pack, 0, node.ip, @port
       end
     end
 
