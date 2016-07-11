@@ -16,6 +16,10 @@ module ArtNet
       raise "Invalid MAC address #{data.inspect}" if @addr.nil?
     end
 
+    def ==(other)
+      to_s == other.to_s
+    end
+
     def to_s
       @addr.map{|b| '%02X' % b}.join(':')
     end

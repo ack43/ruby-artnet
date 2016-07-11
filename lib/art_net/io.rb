@@ -97,8 +97,10 @@ module ArtNet
       case packet
         when Packet::Poll
         when Packet::PollReply
-          @nodes[sender[3]] = packet.node
-          callback :node_update, nodes
+          if packet.node != @nodes[sender[3]]
+            @nodes[sender[3]] = packet.node
+            callback :node_update, nodes
+          end
         when Packet::DMX
           if @rx_data[packet.universe][0...packet.length] != packet.channels
             @rx_data[packet.universe][0...packet.length] = packet.channels
