@@ -1,6 +1,8 @@
 module ArtNet::Packet
   class Address < Base
 
+    OPCODE = 0x6000
+
     attr_accessor :netswitch, :short_name, :long_name, :swin, :swout, :subswitch, :command
 
     def initialize

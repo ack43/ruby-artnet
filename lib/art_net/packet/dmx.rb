@@ -1,6 +1,8 @@
 module ArtNet::Packet
   class DMX < Base
 
+    OPCODE = 0x5000
+
     attr_accessor :sequence, :physical, :universe, :channels
 
     def initialize

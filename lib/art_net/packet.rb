@@ -1,8 +1,6 @@
 require 'ipaddr'
 require 'art_net/mac_addr'
-%w(base address dmx poll poll_reply).each do |file|
-  require "art_net/packet/#{file}"
-end
+require "art_net/packet/base"
 
 module ArtNet
 
@@ -14,19 +12,14 @@ module ArtNet
     ID = 'Art-Net'
     PROTVER = 14
 
-    @@types = {
-      0x2000 => Poll,
-      0x2100 => PollReply,
-      0x5000 => DMX,
-      0x6000 => Address
-    }
+    @@types = {}
 
     def self.types
       @@types
     end
 
-    def self.register(opcode, klass)
-      @@types[opcode] = klass
+    def self.register(klass)
+      @@types[klass.const_get('OPCODE')] = klass
     end
 
     def self.load(data, sender)
@@ -36,6 +29,16 @@ module ArtNet
       raise PacketFormatError.new("Unknown opcode 0x#{opcode.to_s(16)}") if klass.nil?
       packet = klass.unpack(data[10..-1], sender)
       return packet
+    end
+
+    {
+      address: 'Address',
+      dmx: 'DMX',
+      poll: 'Poll',
+      poll_reply: 'PollReply'
+    }.each_pair do |file,  klass|
+      require "art_net/packet/#{file}"
+      register const_get(klass)
     end
 
   end

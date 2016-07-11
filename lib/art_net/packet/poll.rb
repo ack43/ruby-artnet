@@ -1,6 +1,8 @@
 module ArtNet::Packet
   class Poll < Base
 
+    OPCODE = 0x2000
+
     attr_accessor :talk_to_me, :priority
 
     def initialize

@@ -1,6 +1,8 @@
 module ArtNet::Packet
   class PollReply < Base
 
+    OPCODE = 0x2100
+
     def unpack(data)
       @swin = []
       @swout = []

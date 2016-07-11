@@ -12,7 +12,7 @@ module ArtNet::Packet
     end
 
     def opcode
-      ArtNet::Packet.types.invert[self.class]
+      self.class.const_get('OPCODE')
     end
 
     def type
