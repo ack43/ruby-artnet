@@ -20,6 +20,7 @@ module ArtNet::Packet
     end
 
     def pack
+      self.channels = channels[0..511]
       ([ID, opcode, PROTVER, sequence, physical, universe, channels.length] + channels).pack "Z7xvnCCvnC#{length}"
     end
 

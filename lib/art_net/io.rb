@@ -3,7 +3,6 @@ require 'socket'
 module ArtNet
   class IO
     attr_reader   :rx_data, :local_ip, :netmask, :broadcast_ip, :port
-    attr_accessor :tx_data
 
     def initialize(options = {})
       @port    = options[:port] || 6454
@@ -13,7 +12,6 @@ module ArtNet
       @local_ip = get_local_ip @network
       setup_connection
       @rx_data = Array.new(4) { [] }
-      @tx_data = Array.new(4) { Array.new(512, 0) }
       @nodes = {}
       @callbacks = {}
     end
@@ -31,10 +29,10 @@ module ArtNet
 
     # send an ArtDmx packet for a specific universe
     # FIXME: make this able to unicast via a node instance method
-    def send_update(uni)
+    def send_update(uni, channels)
       p = Packet::DMX.new
       p.universe = uni
-      p.channels = @tx_data[uni]
+      p.channels = channels
       transmit p
     end
 
