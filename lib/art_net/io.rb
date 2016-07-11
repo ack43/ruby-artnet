@@ -11,7 +11,7 @@ module ArtNet
       @broadcast_ip = get_broadcast_ip @network, @netmask
       @local_ip = get_local_ip @network
       setup_connection
-      @rx_data = Array.new(4) { [] }
+      @rx_data = Hash.new() {|h, i| h[i] = Array.new(512, 0) }
       @nodes = {}
       @callbacks = {}
     end
@@ -100,7 +100,10 @@ module ArtNet
           @nodes[sender[3]] = packet.node
           callback :node_update, nodes
         when Packet::DMX
-          @rx_data[packet.universe][0..packet.length] = packet.channels
+          if @rx_data[packet.universe][0...packet.length] != packet.channels
+            @rx_data[packet.universe][0...packet.length] = packet.channels
+            callback :dmx, packet.universe, @rx_data[packet.universe]
+          end
       end
       callback(:message, packet) if packet
     end
