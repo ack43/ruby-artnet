@@ -17,7 +17,7 @@ module ArtNet::Packet
     end
 
     def pack
-      [ID, opcode, PROTVER, @talk_to_me, @priority].pack("a7xvnCC")
+      [ID, opcode, PROTVER, @talk_to_me, @priority].pack("Z7xvnCC")
     end
 
   end

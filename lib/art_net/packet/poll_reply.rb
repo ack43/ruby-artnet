@@ -11,7 +11,7 @@ module ArtNet::Packet
       @short_name, @long_name, @report, @ports, @port_types[0], @port_types[1], @port_types[2], @port_types[3],
       @input, @output, @swin[0], @swin[1], @swin[2], @swin[3], @swout[0], @swout[1], @swout[2], @swout[3],
       @swvideo, @swmacro, @swremote, @style, mac,
-      bind_ip, @bindIndex, @status2, final = data.unpack 'L>xxCCCCvCCn Z18Z64Z64nC4 LLC4C4 CCCxxxCa6 LCCx26C'
+      bind_ip, @bindIndex, @status2, final = data.unpack 'NxxCCCCvCCn Z18Z64Z64nC4 VVC4C4 CCCxxxCa6 VCCx26C'
       @ip = IPAddr.new(ip,  Socket::AF_INET)
       @firmware_version = "#{versionh}.#{versionl}".to_f
       @bind_ip = IPAddr.new(bind_ip,  Socket::AF_INET)

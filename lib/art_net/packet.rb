@@ -23,7 +23,7 @@ module ArtNet
     end
 
     def self.load(data, sender)
-      id, opcode = data.unpack 'Z7xS'
+      id, opcode = data.unpack 'Z7xv'
       raise PacketFormatError.new('Not an Art-Net packet') unless id === 'Art-Net'
       klass = types[opcode]
       raise PacketFormatError.new("Unknown opcode 0x#{opcode.to_s(16)}") if klass.nil?
