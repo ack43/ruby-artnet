@@ -16,7 +16,8 @@ module ArtNet::Packet
       @firmware_version = "#{versionh}.#{versionl}".to_f
       @bind_ip = IPAddr.new(bind_ip,  Socket::AF_INET)
       @mac = ArtNet::MacAddr.new(mac)
-      raise PacketFormatError.new('Bad data for ' + self.class.to_s) unless final.nil?
+      # TODO: check is `final` need?
+      # raise ArtNet::PacketFormatError.new('Bad data for ' + self.class.to_s) unless final.nil?
     end
 
     def node

@@ -5,9 +5,15 @@ module ArtNet::Packet
 
     def self.unpack(data, net_info)
       p = self.new
+      puts 'data.inspect'
+      puts data.inspect
+      puts 'p.inspect'
+      puts p.inspect
       p.unpack(data)
       net_info[4] = Time.now
       p.net_info = net_info
+      puts 'p.inspect after '
+      puts p.inspect
       p
     end
 
@@ -34,7 +40,7 @@ module ArtNet::Packet
     private
 
     def check_version(ver)
-      raise PacketFormatError.new("Bad protocol version #{ver}") unless ver == PROTVER
+      raise ArtNet::PacketFormatError.new("Bad protocol version #{ver}") unless ver == PROTVER
     end
 
   end

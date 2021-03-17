@@ -1,3 +1,5 @@
+require 'async/io'
+
 require 'ipaddr'
 require 'socket'
 module ArtNet
@@ -6,7 +8,7 @@ module ArtNet
 
     def initialize(options = {})
       @port    = options[:port] || 6454
-      @network = options[:network] || "2.0.0.0"
+      @network = options[:network] || "192.168.0.100" #"2.0.0.0"
       @netmask = options[:netmask] || "255.255.255.0"
       @broadcast_ip = get_broadcast_ip @network, @netmask
       @local_ip = get_local_ip @network
@@ -18,7 +20,9 @@ module ArtNet
 
     def process_events
       begin
-        until !((data = @udp.recvfrom_nonblock(65535))[0]) do
+        puts @udp.inspect
+        # while (data = @udp.recvfrom_nonblock(65535))[0] do
+        while (data = @udp.recvfrom(65535))[0] do
           process_rx_data(*data)
         end
       rescue Errno::EAGAIN

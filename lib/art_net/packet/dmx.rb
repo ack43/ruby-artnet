@@ -16,7 +16,8 @@ module ArtNet::Packet
       @channels = data.unpack "@8C#{length}C"
       final = @channels.pop
       check_version(protver)
-      raise PacketFormatError.new('Bad data for ' + self.class.to_s) unless final.nil?
+      # TODO: check is `final` need?
+      # raise ArtNet::PacketFormatError.new('Bad data for ' + self.class.to_s) unless final.nil?
     end
 
     def pack

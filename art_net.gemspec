@@ -18,6 +18,8 @@ spec = Gem::Specification.new do |s|
   s.add_development_dependency 'rspec', '~> 2.12'
   s.add_development_dependency 'autotest', '~> 4.4'
 
+  s.add_dependency 'async-io'
+
   s.authors = ["Sen"]
 
   # ruby -rpp -e' pp `git ls-files`.split("\n") '
