@@ -1,7 +1,7 @@
 module ArtNet::Packet
   class DiagData < Base
 
-    OPCODE = 0x5200
+    OPCODE = 0x2300
 
     def initialize
       # https://artisticlicence.com/WebSiteMaster/User%20Guides/art-net.pdf#page=45
@@ -18,6 +18,7 @@ module ArtNet::Packet
       puts 'protver, @filler1, @priority, @filler2, @filler3, @length'
       puts [protver, @filler1, @priority, @filler2, @filler3, @length].inspect
       # @data = data[8..].unpack "Z#{@length}"
+      puts data.inspect
       @data = data.unpack "@8Z#{@length}"
       puts '@data'
       puts @data.inspect

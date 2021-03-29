@@ -80,7 +80,10 @@ module ArtNet
     end
 
     def on(name, &block)
-      @callbacks[name] = block
+      (@callbacks[name] ||= []) << block
+    end
+    def off(name)
+      @callbacks[name]&.shift
     end
 
     def transmit(packet, node=nil)
@@ -108,8 +111,8 @@ module ArtNet
     private
 
     def callback(name, *args)
-      method = @callbacks[name]
-      method.call(*args) if method
+      methods = @callbacks[name]
+      methods.map { |m| m.call(*args) } if methods
     end
 
     # given a network, finds the local interface IP that would be used to reach it
