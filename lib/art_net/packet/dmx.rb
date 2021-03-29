@@ -3,10 +3,16 @@ module ArtNet::Packet
 
     OPCODE = 0x5000
 
-    attr_accessor :sequence, :physical, :universe, :channels
+    attr_accessor :sequence
+    attr_accessor :physical, :universe, :channels
 
-    def initialize
-      @sequence = 0
+    def get_sequence(non_zero = !!@io)
+      (@sequence ? @sequence : ((non_zero && @io) ? @io.up_sequence : 0))
+    end
+
+    def initialize(io = nil)
+      super
+      @sequence = nil
       @physical = 0
       @channels = []
     end
@@ -22,7 +28,7 @@ module ArtNet::Packet
 
     def pack
       self.channels = channels[0..511]
-      ([ID, opcode, PROTVER, sequence, physical, universe, channels.length] + channels).pack "Z7xvnCCvnC#{length}"
+      ([ID, opcode, PROTVER, get_sequence, physical, universe, channels.length] + channels).pack "Z7xvnCCvnC#{length}"
     end
 
     def length

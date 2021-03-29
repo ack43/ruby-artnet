@@ -23,17 +23,23 @@ module ArtNet
     end
 
     def self.load(data, sender)
-      puts 'all data'
-      puts data.inspect
-      puts data[...10].inspect
+      # puts 'all data'
+      # puts data.inspect
+      # puts data[...10].inspect
       id, opcode = data.unpack 'Z7xv'
-      puts types.inspect
-      puts id.inspect
-      puts opcode.inspect
+      # puts types.inspect
+      # puts id.inspect
+      # puts opcode.inspect
       raise PacketFormatError.new('Not an Art-Net packet') unless id === 'Art-Net'
       klass = types[opcode]
-      raise PacketFormatError.new("Unknown opcode 0x#{opcode.to_s(16)}") if klass.nil?
-      packet = klass.unpack(data[10..], sender)
+      # raise PacketFormatError.new("Unknown opcode 0x#{opcode.to_s(16)}") if klass.nil?
+      if klass.nil?
+        puts "Unknown opcode 0x#{opcode.to_s(16)}"
+        packet = Base.new(opcode)
+        packet.raw_data = data
+      else
+        packet = klass.unpack(data[10..], sender)
+      end
       return packet
     end
 
@@ -41,7 +47,9 @@ module ArtNet
       address: 'Address',
       dmx: 'DMX',
       poll: 'Poll',
-      poll_reply: 'PollReply'
+      poll_reply: 'PollReply',
+      sync: 'Sync',
+      diag_data: 'DiagData'
     }.each_pair do |file,  klass|
       require "art_net/packet/#{file}"
       register const_get(klass)

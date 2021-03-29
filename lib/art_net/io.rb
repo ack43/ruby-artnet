@@ -4,26 +4,43 @@ require 'ipaddr'
 require 'socket'
 module ArtNet
   class IO
+
+    PORT = "6454"
+    NETMASK = "255.255.255.0"
+    attr_reader :sequence
+    def up_sequence
+      current = @sequence.clone
+      @sequence = (@sequence % 255 + 1)
+      current
+    end
     attr_reader   :rx_data, :local_ip, :netmask, :broadcast_ip, :port
 
     def initialize(options = {})
-      @port    = options[:port] || 6454
-      @network = options[:network] || "192.168.0.100" #"2.0.0.0"
-      @netmask = options[:netmask] || "255.255.255.0"
+      @port    = options && options[:port] || PORT
+      @network = options && options[:network] || "192.168.0.100" #"2.0.0.0"
+      @netmask = options && options[:netmask] || NETMASK
       @broadcast_ip = get_broadcast_ip @network, @netmask
       @local_ip = get_local_ip @network
-      setup_connection
-      @rx_data = Hash.new() {|h, i| h[i] = Array.new(512, 0) }
+      setup_connection(!options)
+      @rx_data = Hash.new {|h, i| h[i] = Array.new(512, 0) }
       @nodes = {}
       @callbacks = {}
+      @sequence = 1
     end
 
-    def process_events
+    def process_events(type = nil)
       begin
-        puts @udp.inspect
+        # puts 'process_events'
         # while (data = @udp.recvfrom_nonblock(65535))[0] do
         while (data = @udp.recvfrom(65535))[0] do
-          process_rx_data(*data)
+          # puts 'process_rx_data'
+          # puts data.inspect
+          # raise "1`111"
+          data = process_rx_data(*data)
+          
+          # puts 'process_rx_data after '
+          return data
+          # process_rx_data(*data)
         end
       rescue Errno::EAGAIN
         # no data to process!
@@ -33,11 +50,17 @@ module ArtNet
 
     # send an ArtDmx packet for a specific universe
     # FIXME: make this able to unicast via a node instance method
-    def send_update(uni, channels)
-      p = Packet::DMX.new
-      p.universe = uni
-      p.channels = channels
-      transmit p
+    def send_update(uni, channels, offset = 0)
+      puts "send new dmx"
+      packet = Packet::DMX.new(self)
+      limit = channels.length+offset # TODO: limit as 512
+      packet.universe = uni
+      packet.channels = @rx_data[uni]
+      packet.channels[offset...limit] = channels
+      # puts "packet.inspect"
+      # puts packet.inspect
+      # puts packet.pack
+      transmit packet
     end
 
     # send an ArtPoll packet
@@ -75,6 +98,12 @@ module ArtNet
       @broadcast_ip = get_broadcast_ip @network, @netmask
       poll_nodes
     end
+    
+    def process_data data, sender
+      # puts 'process_data'
+      # puts data.inspect
+      process_rx_data data, sender
+    end
 
     private
 
@@ -85,6 +114,10 @@ module ArtNet
 
     # given a network, finds the local interface IP that would be used to reach it
     def get_local_ip(network)
+      # puts 'Socket.ip_address_list'
+      # puts Socket.ip_address_list.inspect
+      # raise '111'
+      #TODO: Socket.ip_address_list
       UDPSocket.open do |sock|
         sock.connect network, 1
         sock.addr.last
@@ -97,26 +130,56 @@ module ArtNet
     end
 
     def process_rx_data data, sender
+      # raise "22222"
       packet = Packet.load(data, sender)
+      callback_data = {
+        sender: sender,
+        packet: packet
+      }
       case packet
-        when Packet::Poll
-        when Packet::PollReply
-          if packet.node != @nodes[sender[3]]
-            @nodes[sender[3]] = packet.node
-            callback :node_update, nodes
-          end
-        when Packet::DMX
-          if @rx_data[packet.universe][0...packet.length] != packet.channels
-            @rx_data[packet.universe][0...packet.length] = packet.channels
-            callback :dmx, packet.universe, @rx_data[packet.universe]
-          end
+      when Packet::Poll
+        callback :poll, callback_data
+      when Packet::PollReply
+        if packet.node != @nodes[sender[3]]
+          @nodes[sender[3]] = packet.node
+          callback :node_update, callback_data.merge({
+            node: packet.node, 
+            nodes: nodes
+          })
+        end
+      when Packet::DMX
+        puts "dmx"
+        if @rx_data[packet.universe][0...packet.length] != packet.channels
+          @rx_data[packet.universe][0...packet.length] = packet.channels
+          # callback :output, callback_data.merge({
+          #   universe: packet.universe, 
+          #   data: @rx_data[packet.universe]
+          # })] #TODO
+
+        end
+        callback :dmx, callback_data.merge({
+          universe: packet.universe, 
+          data: @rx_data[packet.universe][0...packet.length]
+        })
+
+      when Packet::DiagData
+        callback :diag_data, callback_data
+
+      when Packet::Base
+        puts "packet - #{packet.inspect}"
+      when nil
+        puts "unknown packet. class not found"
+      else
+        puts "some shit happens"
       end
-      callback(:message, packet) if packet
+      callback(:message, callback_data) if packet
     end
 
-    def setup_connection
-      @udp = UDPSocket.new
-      @udp.bind "0.0.0.0", @port
+    def setup_connection(only_bcast = false)
+      unless only_bcast
+        @udp = UDPSocket.new
+        @udp.bind "0.0.0.0", @port rescue false
+      end
       @udp_bcast = UDPSocket.new
       @udp_bcast.setsockopt(Socket::SOL_SOCKET, Socket::SO_BROADCAST, true)
     end

@@ -1,24 +1,41 @@
 module ArtNet::Packet
   class Base
 
+    attr_accessor :io
+    attr_accessor :raw_data
+    def initialize(opcode = nil, io = nil)
+      unless opcode.is_a?(Integer)
+        io ||= opcode
+        opcode = nil
+      end
+      @opcode = opcode
+      @io = io
+    end
+
+
     attr_writer :net_info
 
     def self.unpack(data, net_info)
       p = self.new
-      puts 'data.inspect'
-      puts data.inspect
-      puts 'p.inspect'
-      puts p.inspect
+      # puts 'new packet'
+      # puts 'data.inspect'
+      # puts data.inspect
       p.unpack(data)
       net_info[4] = Time.now
       p.net_info = net_info
-      puts 'p.inspect after '
-      puts p.inspect
+      # puts 'p.inspect after '
+      # puts p.inspect
+      # puts ""
+      # puts ""
       p
     end
 
+    def pack
+      puts "i can pack "
+    end
+
     def opcode
-      self.class.const_get('OPCODE')
+      @opcode || self.class.const_get('OPCODE')
     end
 
     def type
