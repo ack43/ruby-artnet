@@ -1,6 +1,7 @@
 *.gem
 *.rbc
 .bundle
+.vscode
 .config
 coverage
 InstalledFiles

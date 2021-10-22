@@ -5,8 +5,11 @@ module ArtNet
       @addr = nil
       if data.nil?
         @addr = [0,0,0,0,0,0]
+      # elsif data.is_a?(Integer)
+      #   @addr = [data].unpack 'C*'
       elsif data.length == 6
-        @addr = data.unpack 'C*'
+        @addr = data
+        # @addr = data.unpack 'C*'
       else
         data.gsub!(/[\s:-]*/, '').upcase
         if data.length == 12 && data.all?{|c| ('A'..'F').include?(c) || ('0'..'9').include?(c)}

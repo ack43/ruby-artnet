@@ -1,6 +1,17 @@
 module ArtNet::Packet
   class Base
 
+    # TODO
+    def inspect(full = false)
+      attrs = full ? instance_variables : (instance_variables - [:@channels, :data])
+      attributes_as_nice_string = attrs.collect { |name|
+        if instance_variable_defined?(name)
+          "#{name}: #{instance_variable_get(name)}"
+        end
+      }.compact.join(", ")
+      "#<#{self.class} #{attributes_as_nice_string}>"
+    end
+
     attr_accessor :io
     attr_accessor :raw_data
     def initialize(opcode = nil, io = nil)
@@ -20,9 +31,11 @@ module ArtNet::Packet
       # puts 'new packet'
       # puts 'data.inspect'
       # puts data.inspect
-      p.unpack(data)
-      net_info[4] = Time.now
-      p.net_info = net_info
+      p.unpack(data, self)
+      if net_info
+        net_info[4] = Time.now
+        p.net_info = net_info
+      end
       # puts 'p.inspect after '
       # puts p.inspect
       # puts ""
@@ -53,6 +66,10 @@ module ArtNet::Packet
     def received_at
       @net_info[4]
     end
+
+    # F*ckuck ArtNetPollReply
+    def self.protver_check?; true; end
+    def self.data_offset; 12; end
 
     private
 

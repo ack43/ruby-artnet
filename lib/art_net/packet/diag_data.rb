@@ -13,8 +13,8 @@ module ArtNet::Packet
       @data = nil
     end
 
-    def unpack(data)
-      protver, @filler1, @priority, @filler2, @filler3, @length = data.unpack 'nCCCCn'
+    def unpack(data, io = nil)
+      @filler1, @priority, @filler2, @filler3, @length = data.unpack 'CCCCn'
       puts 'protver, @filler1, @priority, @filler2, @filler3, @length'
       puts [protver, @filler1, @priority, @filler2, @filler3, @length].inspect
       # @data = data[8..].unpack "Z#{@length}"
@@ -22,7 +22,7 @@ module ArtNet::Packet
       @data = data.unpack "@8Z#{@length}"
       puts '@data'
       puts @data.inspect
-      check_version(protver)
+      # check_version(protver)
     end
 
     def pack

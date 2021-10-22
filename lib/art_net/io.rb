@@ -1,9 +1,31 @@
-require 'async/io'
+# require 'async/io'
 
 require 'ipaddr'
 require 'socket'
+
 module ArtNet
   class IO
+  end
+end
+
+require 'art_net/io/nodes'
+require 'art_net/io/callbacks'
+module ArtNet
+  class IO
+
+    include ArtNet::IO::Callbacks
+    include ArtNet::IO::Nodes
+
+    # TODO
+    def inspect(full = false)
+      attrs = full ? instance_variables : (instance_variables - [:@rx_data])
+      attributes_as_nice_string = attrs.collect { |name|
+        if instance_variable_defined?(name)
+          "#{name}: #{instance_variable_get(name)}"
+        end
+      }.compact.join(", ")
+      "#<#{self.class} #{attributes_as_nice_string}>"
+    end
 
     PORT = "6454"
     NETMASK = "255.255.255.0"
@@ -17,10 +39,10 @@ module ArtNet
 
     def initialize(options = {})
       @port    = options && options[:port] || PORT
-      @network = options && options[:network] || "192.168.0.100" #"2.0.0.0"
+      @network = options && options[:network] || "192.168.0.255" #"2.0.0.0"
       @netmask = options && options[:netmask] || NETMASK
       @broadcast_ip = get_broadcast_ip @network, @netmask
-      @local_ip = get_local_ip @network
+      # @local_ip = get_local_ip @network
       setup_connection(!options)
       @rx_data = Hash.new {|h, i| h[i] = Array.new(512, 0) }
       @nodes = {}
@@ -29,23 +51,33 @@ module ArtNet
     end
 
     def process_events(type = nil)
-      begin
+      # begin
         # puts 'process_events'
-        # while (data = @udp.recvfrom_nonblock(65535))[0] do
-        while (data = @udp.recvfrom(65535))[0] do
+        while (data, sender = @udp.recvfrom_nonblock(65535, exception: false))[0] do
+        # while (data = @udp.recvfrom(65535))[0] do
           # puts 'process_rx_data'
           # puts data.inspect
           # raise "1`111"
-          data = process_rx_data(*data)
+          
+          if(data != :wait_readable)
+            # puts "data.inspect"
+            # puts data.inspect
+            # puts sender.inspect
+            data = process_rx_data(data, sender)
+            # puts 'process_rx_data after '
+            return data
+          end
+          # puts data
+          # data = process_rx_data(*data)
           
           # puts 'process_rx_data after '
           return data
           # process_rx_data(*data)
         end
-      rescue Errno::EAGAIN
-        # no data to process!
-        return nil
-      end
+      # rescue
+      #   # no data to process!
+      #   return nil
+      # end
     end
 
     # send an ArtDmx packet for a specific universe
@@ -63,28 +95,6 @@ module ArtNet
       transmit packet
     end
 
-    # send an ArtPoll packet
-    # normal process_events calls later will then collect the results in @nodes
-    def poll_nodes
-      # clear any list of nodes we already know about and start fresh
-      @nodes.clear
-      transmit Packet::Poll.new
-    end
-
-    def nodes
-      @nodes.values
-    end
-
-    def node(ip)
-      @nodes[ip]
-    end
-
-    def on(name, &block)
-      (@callbacks[name] ||= []) << block
-    end
-    def off(name)
-      @callbacks[name]&.shift
-    end
 
     def transmit(packet, node=nil)
       if node.nil?
@@ -122,7 +132,7 @@ module ArtNet
       # raise '111'
       #TODO: Socket.ip_address_list
       UDPSocket.open do |sock|
-        sock.connect network, 1
+        sock.connect network, PORT
         sock.addr.last
       end
     end
@@ -140,9 +150,12 @@ module ArtNet
         packet: packet
       }
       case packet
+      when Packet::Address
+        callback :address, callback_data
       when Packet::Poll
         callback :poll, callback_data
       when Packet::PollReply
+        # TODO: message about collision
         if packet.node != @nodes[sender[3]]
           @nodes[sender[3]] = packet.node
           callback :node_update, callback_data.merge({
@@ -151,7 +164,7 @@ module ArtNet
           })
         end
       when Packet::DMX
-        puts "dmx"
+        # puts "dmx"
         if @rx_data[packet.universe][0...packet.length] != packet.channels
           @rx_data[packet.universe][0...packet.length] = packet.channels
           # callback :output, callback_data.merge({

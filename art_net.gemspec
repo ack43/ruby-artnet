@@ -1,12 +1,12 @@
 require File.expand_path('../lib/art_net/version', __FILE__)
 
 spec = Gem::Specification.new do |s|
-  s.name = 'ruby-artnet'
+  s.name = 'artnet'
   s.version = ArtNet::VERSION
-  s.date = '2012-10-26'
+  s.date = '2021-05-24'
   s.summary = 'Pure Ruby implementation of the Art-Net lighting protocol'
-  s.email = "ruby-artnet@sen.cx"
-  s.homepage = "http://github.com/sarahemm/ruby-artnet/"
+  s.email = "dev@redrocks.pro"
+  s.homepage = "https://github.com/ack43/ruby-artnet/"
   s.description = "Pure Ruby implementation of the Art-Net lighting protocol"
   s.has_rdoc = false
   s.rdoc_options = '--include=examples'
@@ -18,16 +18,11 @@ spec = Gem::Specification.new do |s|
   s.add_development_dependency 'rspec', '~> 2.12'
   s.add_development_dependency 'autotest', '~> 4.4'
 
-  s.add_dependency 'async-io'
+  # s.add_dependency 'async-io'
 
-  s.authors = ["Sen"]
+  s.authors = ["Alexander Kiseliev", "Sen"]
 
-  # ruby -rpp -e' pp `git ls-files`.split("\n") '
-  s.files = [
-    "README.md",
-    "art_net.gemspec",
-    "lib/art_net/io.rb",
-    "lib/art_net/node.rb",
-    "lib/art_net/version.rb",
-  ]
+  s.files         = `git ls-files`.split($/)
+  s.test_files    = s.files.grep(%r{^(test|spec|features)/})
+  s.require_paths = ['lib']
 end

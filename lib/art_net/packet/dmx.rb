@@ -17,11 +17,12 @@ module ArtNet::Packet
       @channels = []
     end
 
-    def unpack(data)
-      protver, @sequence, @physical, @universe, length = data.unpack 'nCCvn'
+    def unpack(data, io = nil)
+      @sequence, @physical, @universe, length = data.unpack 'CCvn'
+      #   C       C           v           n
       @channels = data.unpack "@8CC#{length}"
       final = @channels.pop
-      check_version(protver)
+      # check_version(protver)
       # TODO: check is `final` need?
       # raise ArtNet::PacketFormatError.new('Bad data for ' + self.class.to_s) unless final.nil?
     end

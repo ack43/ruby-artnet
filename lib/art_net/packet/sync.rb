@@ -9,11 +9,11 @@ module ArtNet::Packet
       @aux2 = 0
     end
 
-    def unpack(data)
-      protver, @aux1, @aux2 = data.unpack 'nCC'
+    def unpack(data, io = nil)
+      @aux1, @aux2 = data.unpack 'CC'
       puts 'protver, @aux1, @aux2'
       puts [protver, @aux1, @aux2].inspect
-      check_version(protver)
+      # check_version(protver)
     end
 
     def pack
