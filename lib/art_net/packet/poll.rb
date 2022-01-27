@@ -24,8 +24,8 @@ module ArtNet::Packet
 
     def unpack(data, io = nil)
       @talk_to_me, @priority = data.unpack 'C C'
-      puts '@talk_to_me, @priority'
-      puts [@talk_to_me, @priority].inspect
+      # puts '@talk_to_me, @priority'
+      # puts [@talk_to_me, @priority].inspect
       # TODO: check is `final` need?
       # raise ArtNet::PacketFormatError.new('Bad data for ' + self.class.to_s) unless final.nil? 
     end

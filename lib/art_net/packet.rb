@@ -34,7 +34,7 @@ module ArtNet
         packet = Base.new(opcode)
         packet.raw_data = data
       else
-        packet = klass.unpack(data[klass.data_offset..], sender)
+        packet = klass.unpack(data[klass.data_offset..-1], sender)
       end
       return packet
     end
@@ -51,7 +51,7 @@ module ArtNet
         packet = Base.new(opcode)
         packet.raw_data = data
       else
-        packet = klass.unpack(data[klass.data_offset..], sender)
+        packet = klass.unpack(data[klass.data_offset..-1], sender)
       end
       return packet
     end

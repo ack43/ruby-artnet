@@ -20,7 +20,7 @@ module ArtNet::Packet
     def unpack(data, io = nil)
       @sequence, @physical, @universe, length = data.unpack 'CCvn'
       #   C       C           v           n
-      @channels = data.unpack "@8CC#{length}"
+      @channels = data.unpack "@6CC#{length}"
       final = @channels.pop
       # check_version(protver)
       # TODO: check is `final` need?

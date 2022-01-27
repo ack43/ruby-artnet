@@ -1,7 +1,7 @@
 require File.expand_path('../lib/art_net/version', __FILE__)
 
 spec = Gem::Specification.new do |s|
-  s.name = 'artnet'
+  s.name = 'art_net'
   s.version = ArtNet::VERSION
   s.date = '2021-05-24'
   s.summary = 'Pure Ruby implementation of the Art-Net lighting protocol'

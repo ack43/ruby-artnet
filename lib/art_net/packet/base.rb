@@ -33,7 +33,7 @@ module ArtNet::Packet
       # puts data.inspect
       p.unpack(data, self)
       if net_info
-        net_info[4] = Time.now
+        net_info[4] ||= Time.now
         p.net_info = net_info
       end
       # puts 'p.inspect after '

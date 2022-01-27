@@ -17,10 +17,11 @@ class ArtNet::EMServer < EM::Connection
     # EM.stop
   end
 
-  def self.init_me &block
+  def self.init_me(address = '0.0.0.0', port = ArtNet::IO::PORT, &block)
+    puts "ArtNet::EMServer init_me (#{address}:#{port})"
     # @artnet = ArtNet::IO.new(false)
-      # EM::open_datagram_socket('192.168.0.203', ArtNet::IO::PORT, self, &block)
-      EM::open_datagram_socket('0.0.0.0', ArtNet::IO::PORT, self, &block)
+    # EM::open_datagram_socket('192.168.0.203', ArtNet::IO::PORT, self, &block)
+    EM::open_datagram_socket(address, port, self, &block)
   end
 
   
