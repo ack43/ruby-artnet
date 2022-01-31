@@ -17,7 +17,7 @@ module ArtNet::Packet
       @filler1, @priority, @filler2, @filler3, @length = data.unpack 'CCCCn'
       puts 'protver, @filler1, @priority, @filler2, @filler3, @length'
       puts [protver, @filler1, @priority, @filler2, @filler3, @length].inspect
-      # @data = data[8..].unpack "Z#{@length}"
+      # @data = data[8..-1].unpack "Z#{@length}"
       puts data.inspect
       @data = data.unpack "@8Z#{@length}"
       puts '@data'

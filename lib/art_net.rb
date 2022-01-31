@@ -1,5 +1,6 @@
 
 
+require 'art_net/version'
 module ArtNet
 end
 
