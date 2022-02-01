@@ -41,9 +41,9 @@ trap(:TERM){ puts "term"; EM.stop }
 # step = 0
 EM.run do
   ArtNet::EMServer.test_me do |s|
-    s.artnet.off :message
-    s.artnet.on :message do |data|
-      puts "msg"
+    s.artnet.off :dmx
+    s.artnet.on :dmx do |data|
+      puts "msg - #{data[:packet].universe} #{data[:packet].length}: #{data[:packet].channels.join(" ")}"
     end
   end
   # EM::open_datagram_socket('192.168.0.203', ArtNet::IO::PORT, nil) do |s|
