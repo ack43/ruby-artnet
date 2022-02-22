@@ -8,7 +8,7 @@ spec = Gem::Specification.new do |s|
   s.email = "dev@redrocks.pro"
   s.homepage = "https://github.com/ack43/ruby-artnet/"
   s.description = "Pure Ruby implementation of the Art-Net lighting protocol"
-  s.has_rdoc = false
+  # s.has_rdoc = false
   s.rdoc_options = '--include=examples'
 
   # ruby -rpp -e' pp `git ls-files`.split("\n").grep(/^(doc|README)/) '
