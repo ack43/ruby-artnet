@@ -4,7 +4,7 @@ class ArtNet::EMServer < EM::Connection
 
   def initialize
     @artnet = ArtNet::IO.new(false)
-    puts "init emserver"
+    # puts "init emserver"
   end
 
   def receive_data(data)
@@ -18,7 +18,7 @@ class ArtNet::EMServer < EM::Connection
   end
 
   def self.init_me(address = '0.0.0.0', port = ArtNet::IO::PORT, &block)
-    puts "ArtNet::EMServer init_me (#{address}:#{port})"
+    # puts "ArtNet::EMServer init_me (#{address}:#{port})"
     # @artnet = ArtNet::IO.new(false)
     # EM::open_datagram_socket('192.168.0.203', ArtNet::IO::PORT, self, &block)
     EM::open_datagram_socket(address, port, self, &block)
